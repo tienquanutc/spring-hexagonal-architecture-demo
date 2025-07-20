@@ -1,0 +1,76 @@
+plugins {
+    id "java"
+    id "org.springframework.boot" version "3.5.3"
+    id "io.spring.dependency-management" version "1.1.6"
+    id "org.graalvm.buildtools.native" version "0.10.3"
+    id "com.google.protobuf" version "0.9.4"
+    id "io.freefair.lombok" version "8.14"
+}
+
+group = "com.example"
+version = "0.10.0-SNAPSHOT"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://repo.spring.io/milestone" }
+    maven { url "https://repo.spring.io/snapshot" }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.grpc:spring-grpc-dependencies:0.10.0-SNAPSHOT"
+    }
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.grpc:spring-grpc-spring-boot-starter"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-data-redis"
+
+    implementation "org.apache.commons:commons-lang3:3.18.0"
+    implementation "org.apache.commons:commons-text:1.13.1"
+
+    implementation "io.grpc:grpc-services"
+    runtimeOnly "com.h2database:h2"
+
+    implementation "org.mapstruct:mapstruct:1.6.3"
+    annotationProcessor "org.mapstruct:mapstruct-processor:1.6.3"
+
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.springframework.grpc:spring-grpc-test"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    testRuntimeOnly "io.netty:netty-transport-native-epoll::linux-x86_64"
+}
+
+test {
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
+    outputs.upToDateWhen { false }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${dependencyManagement.importedProperties["protobuf-java.version"]}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${dependencyManagement.importedProperties["grpc.version"]}"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {
+                option "@generated=omit"
+            }
+        }
+    }
+}

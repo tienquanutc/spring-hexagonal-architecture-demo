@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.springframework.grpc.error.proto";
+option java_outer_classname = "ErrorProto";
+
+message BIDDErrorInfo {
+  string code = 1;
+  string message = 2;
+  string errorSource = 3;
+  repeated string stackTrace = 4;
+}
